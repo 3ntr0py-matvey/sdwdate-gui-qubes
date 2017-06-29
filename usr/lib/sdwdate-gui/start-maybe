@@ -1,0 +1,26 @@
+#!/bin/bash
+
+## This file is part of Whonix.
+## Copyright (C) 2012 - 2014 Patrick Schleizer <adrelanos@riseup.net>
+## See the file COPYING for copying conditions.
+
+set -e
+
+if [ -e /var/run/qubes/this-is-templatevm ]; then
+   exit 0
+fi
+
+## Legacy, versions lower than Qubes R3.2.
+if [ -e /var/run/qubes-service/whonix-template ]; then
+   exit 0
+fi
+
+if [ -d /usr/lib/qubes ]; then
+   ## Do not automatically start sdwdate-gui in Qubes due to various issues.
+   ## - https://github.com/QubesOS/qubes-issues/issues/2264
+   ## - https://github.com/QubesOS/qubes-issues/issues/2268
+   ## - https://phabricator.whonix.org/T534
+   exit 0
+fi
+
+sdwdate-gui

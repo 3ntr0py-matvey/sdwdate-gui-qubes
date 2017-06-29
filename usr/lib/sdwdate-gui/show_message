@@ -1,0 +1,62 @@
+#!/usr/bin/python3 -u
+
+## Copyright (C) 2015 - 2017 Patrick Schleizer <adrelanos@riseup.net>
+## See the file COPYING for copying conditions.
+
+import sys
+import signal
+from PyQt5 import QtGui
+from PyQt5 import QtCore,QtWidgets
+from PyQt5.QtCore import Qt
+
+
+class Frame(QtWidgets.QFrame):
+    def __init__(self, parent=None):
+        QtWidgets.QFrame.__init__(self, parent)
+        self.setWindowTitle('Time Synchronization Monitor')
+        self.setMinimumWidth(320)
+        self.m_content = QtWidgets.QWidget(self)
+
+        frame_layout = QtWidgets.QVBoxLayout(self)
+        frame_layout.addWidget(self.m_content)
+
+    # Allows access to the content area of the frame
+    # where widgets and layouts can be added.
+    def widget_content(self):
+        return self.m_content
+
+def signal_handler(signum, stack):
+    # SIGTERM or SIGINT
+    if signum == 15 or signum == 2:
+        QtWidgets.QApplication.exit()
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
+    app = QtWidgets.QApplication(sys.argv);
+    msg = sys.argv[1]
+    pos_x = int(sys.argv[2])
+    pos_y = int(sys.argv[3])
+
+    popup = Frame()
+    frame_content = QtWidgets.QVBoxLayout(popup.widget_content())
+
+    text = QtWidgets.QLabel()
+    text.setTextInteractionFlags(Qt.LinksAccessibleByMouse |
+                                 Qt.TextSelectableByMouse)
+    text.setTextFormat(Qt.RichText)
+    text.setText(msg)
+
+    frame_content.addWidget(text)
+
+    popup.move(pos_x, pos_y)
+    popup.show()
+
+    ## Python cannot handle signals while the Qt event loop is running.
+    ## The signal handler is called when a Python function is called
+    timer = QtCore.QTimer()
+    timer.start(200)
+    timer.timeout.connect(lambda: None)
+
+    sys.exit(app.exec_())
